@@ -1,0 +1,13 @@
+[tool.poetry]
+name = "logconf"
+version = "0.1.0"
+description = "convenient python stdlib logging configuration"
+authors = ["Andreas Lutro <anlutro@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.5"
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.0"
+logging_tree = "*"
+pylint = "^2.1"
