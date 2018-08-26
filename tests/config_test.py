@@ -3,8 +3,6 @@ from unittest import mock
 import logging
 import sys
 
-import pytest
-
 from logconf import LoggerConfig
 
 
