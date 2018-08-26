@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from logconf import logconf
+from logconf import global_logconf
 import argparse
 import logging
 log = logging.getLogger('scripts.log')
@@ -15,7 +15,7 @@ def main():
     parser.add_argument('-t', '--tree', action='store_true')
     args = parser.parse_args()
 
-    with logconf(shorten_levels=not args.long_levels, colors=args.colors) as cfg:
+    with global_logconf(shorten_levels=not args.long_levels, colors=args.colors) as cfg:
         if args.log_file:
             cfg.log_to_file(args.log_file, args.file_level, json=args.json)
         cfg.log_to_console_if_interactive(args.console_level)

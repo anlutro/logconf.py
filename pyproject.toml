@@ -9,6 +9,8 @@ readme = "README.md"
 python = "^3.5"
 
 [tool.poetry.dev-dependencies]
-pytest = "^3.0"
 logging_tree = "*"
-pylint = "^2.1"
+pycodestyle = "*"
+pylint = "*"
+pytest = "*"
+pytest-pythonpath = "*"

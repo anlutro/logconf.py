@@ -5,9 +5,7 @@ import logging.handlers
 import sys
 import time
 
-__all__ = ['logconf']
-
-LOG = logging.getLogger(__name__)
+__all__ = ('global_logconf', 'LoggerConfig')
 
 
 class JsonFormatter(logging.Formatter):
@@ -106,22 +104,25 @@ class LoggerConfig:
     shorten_levels = False
 
     def __init__(self, name='', level=logging.NOTSET, *,
-                 handler_level=logging.NOTSET, propagate=False):
+                 handler_level=logging.NOTSET, propagate=False,
+                 exclusive=True):
         """
         Args:
-            name: Name of the logger to start configuring at.
-            level: Which level to set on the root logger. If this is set,
-                levels lower than this will be ignored even if set on individual
-                handlers, so it's usually a good idea to leave this at NOTSET.
-            handler_level: Which level to set for handlers by default.
-            propagate: Whether logs should propagate to the parent logger.
-                Only applies if not configuring a root logger.
+          name: Name of the logger to start configuring at.
+          level: Which level to set on the root logger. If this is set, levels
+            lower than this will be ignored even if set on individual handlers,
+            so it's usually a good idea to leave this at NOTSET.
+          handler_level: Which level to set for handlers by default.
+          propagate: Whether logs should propagate to the parent logger.
+            Only applies if not configuring a root logger.
+          exclusive: Whether to overwrite existing handlers.
         """
         self.name = name
         self.level = level
         self.is_root = name == ''
         self.handler_level = handler_level
         self.propagate = propagate
+        self.exclusive = exclusive
 
         self._startup_messages = []
         self._handlers = []
@@ -203,25 +204,34 @@ class LoggerConfig:
         root.propagate = bool(self._handlers if self.propagate is None
                               else self.propagate)
 
-        for handler in self._handlers:
-            root.addHandler(handler)
+        if self.exclusive:
+            root.handlers = self._handlers[:]
+        else:
+            root.handlers.extend(self._handlers)
 
+        logger = logging.getLogger(__name__)
         for line in self._startup_messages:
             level, message = line[:2]
             args = line[2:]
-            LOG.log(level, message, *args)
+            logger.log(level, message, *args)
 
     @contextlib.contextmanager
-    def logger(self, logger_name, **kwargs):
+    def logger(self, logger_name):
         assert logger_name, 'must provide logger_name'
-        logger_name = '.'.join((self.name, logger_name))
+        logger_name = '.'.join(n for n in (self.name, logger_name) if n)
         lc = type(self)(logger_name)
         yield lc
         lc.finish()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.finish()
+
 
 @contextlib.contextmanager
-def logconf(*, shorten_levels=False, colors=False, **kwargs):
+def global_logconf(*, shorten_levels=False, colors=False, **kwargs):
     logger_config = LoggerConfig(**kwargs)
 
     if shorten_levels:
