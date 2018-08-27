@@ -179,7 +179,7 @@ class LoggerConfig:
             'setting up log handler %r to %s with level %s',
             handler, file, level,
         )
-        self._handlers.append(handler)
+        self.add_handler(handler)
 
     def log_json_to_file(self, file, level=None, fields=None):
         """
@@ -193,6 +193,12 @@ class LoggerConfig:
         """
         if sys.__stderr__.isatty():
             self.log_to_file('stderr', level=level)
+
+    def add_handler(self, handler):
+        """
+        Add a handler to the logger.
+        """
+        self._handlers.append(handler)
 
     def finish(self):
         """
