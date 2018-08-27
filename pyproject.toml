@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "logconf"
-version = "0.2.0"
+version = "0.2.1"
 description = "convenient python stdlib logging configuration"
 authors = ["Andreas Lutro <anlutro@gmail.com>"]
 readme = "README.md"
