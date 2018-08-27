@@ -8,9 +8,9 @@ Setting up logging in Python is verbose and error prone. This library aims to fi
 
 ```python
 import logging
-from logconf import logconf
+from logconf import global_logconf
 
-with logconf() as logger:
+with global_logconf() as logger:
     # simple example:
     logger.log_to_console_if_interactive(level=logging.DEBUG)
     if os.getenv('LOG_DEST'):  # can be "stdout" or "stderr"
