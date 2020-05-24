@@ -5,14 +5,15 @@ import logging.handlers
 import sys
 import time
 
-__all__ = ('global_logconf', 'LoggerConfig')
+__all__ = ("global_logconf", "LoggerConfig")
 
 
 class JsonFormatter(logging.Formatter):
     """
     Formatter for writing line-delimited JSON logs.
     """
-    separators = (',', ':')
+
+    separators = (",", ":")
 
     def __init__(self, fields=None, datefmt=None):
         super(JsonFormatter, self).__init__(datefmt=datefmt)
@@ -23,22 +24,21 @@ class JsonFormatter(logging.Formatter):
         record.message = record.getMessage()
 
         data = {
-            'level': record.levelname,
-            'name': record.name,
-            'msg': self.formatMessage(record),
-            'time': time.strftime(
-                '%Y-%m-%dT%H:%M:%S%z',
-                self.converter(record.created),
+            "level": record.levelname,
+            "name": record.name,
+            "msg": self.formatMessage(record),
+            "time": time.strftime(
+                "%Y-%m-%dT%H:%M:%S%z", self.converter(record.created),
             ),
         }
 
         if record.exc_info and not record.exc_text:
             record.exc_text = self.formatException(record.exc_info)
         if record.exc_text:
-            data['exc_info'] = record.exc_text
+            data["exc_info"] = record.exc_text
 
-        if record.stack_info and 'stack_info' in self.fields:
-            data['stack_info'] = self.formatStack(record.stack_info)
+        if record.stack_info and "stack_info" in self.fields:
+            data["stack_info"] = self.formatStack(record.stack_info)
 
         for key in self.fields - data.keys():
             data[key] = getattr(record, key)
@@ -46,25 +46,27 @@ class JsonFormatter(logging.Formatter):
         return json_dumps(data, separators=self.separators)
 
     def __repr__(self):
-        return 'JsonFormatter(keys=[%s])' % ','.join(self.fields)
+        return "JsonFormatter(keys=[%s])" % ",".join(self.fields)
 
 
 def get_formatter(colors, shortened_levels=True):
     level_len = 5 if shortened_levels else 8
     if colors:
         level_len += 11
-        fmt = ('\033[37m%(asctime)s %(levelname_colored)' + str(level_len) +
-               's\033[37m %(name)s \033[0m%(message)s')
+        fmt = (
+            "\033[37m%(asctime)s %(levelname_colored)"
+            + str(level_len)
+            + "s\033[37m %(name)s \033[0m%(message)s"
+        )
     else:
-        fmt = ('%(asctime)s [%(levelname)' + str(level_len) +
-               's] [%(name)s] %(message)s')
+        fmt = "%(asctime)s [%(levelname)" + str(level_len) + "s] [%(name)s] %(message)s"
     return logging.Formatter(fmt)
 
 
 class ColorLogRecord(logging.LogRecord):
-    RESET = '\033[0m'
+    RESET = "\033[0m"
     BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE = (
-        '\033[1;%dm' % (i + 30) for i in range(8)
+        "\033[1;%dm" % (i + 30) for i in range(8)
     )
 
     COLORS = {
@@ -77,18 +79,16 @@ class ColorLogRecord(logging.LogRecord):
 
     def __init__(self, *args, **kwargs):
         super(ColorLogRecord, self).__init__(*args, **kwargs)
-        self.levelname_colored = ''.join((
-            self.COLORS[self.levelno],
-            self.levelname,
-            self.RESET,
-        ))
+        self.levelname_colored = "".join(
+            (self.COLORS[self.levelno], self.levelname, self.RESET,)
+        )
 
 
 def shorten_levels_globally():
-    logging._levelToName[logging.WARNING] = 'WARN'
-    logging._nameToLevel['WARN'] = logging.WARNING
-    logging._levelToName[logging.CRITICAL] = 'CRIT'
-    logging._nameToLevel['CRIT'] = logging.CRITICAL
+    logging._levelToName[logging.WARNING] = "WARN"
+    logging._nameToLevel["WARN"] = logging.WARNING
+    logging._levelToName[logging.CRITICAL] = "CRIT"
+    logging._nameToLevel["CRIT"] = logging.CRITICAL
 
 
 def normalize_level(level):
@@ -103,9 +103,15 @@ class LoggerConfig:
     colors = False
     shorten_levels = False
 
-    def __init__(self, name='', level=logging.NOTSET, *,
-                 handler_level=logging.NOTSET, propagate=False,
-                 exclusive=True):
+    def __init__(
+        self,
+        name="",
+        level=logging.NOTSET,
+        *,
+        handler_level=logging.NOTSET,
+        propagate=False,
+        exclusive=True
+    ):
         """
         Args:
           name: Name of the logger to start configuring at.
@@ -119,7 +125,7 @@ class LoggerConfig:
         """
         self.name = name
         self.level = level
-        self.is_root = name == ''
+        self.is_root = name == ""
         self.handler_level = handler_level
         self.propagate = propagate
         self.exclusive = exclusive
@@ -153,7 +159,7 @@ class LoggerConfig:
         """
         Log to a file.
         """
-        if isinstance(file, str) and file.lower() in ('stderr', 'stdout'):
+        if isinstance(file, str) and file.lower() in ("stderr", "stdout"):
             handler = logging.StreamHandler(getattr(sys, file.lower()))
         else:
             handler = logging.handlers.WatchedFileHandler(file)
@@ -176,8 +182,10 @@ class LoggerConfig:
 
         self.add_startup_message(
             logging.INFO,
-            'setting up log handler %r to %s with level %s',
-            handler, file, level,
+            "setting up log handler %r to %s with level %s",
+            handler,
+            file,
+            level,
         )
         self.add_handler(handler)
 
@@ -187,12 +195,12 @@ class LoggerConfig:
         """
         self.log_to_file(file, level=level, json=True, json_fields=fields)
 
-    def log_to_console_if_interactive(self, level=None):
+    def log_to_console_if_interactive(self, *args, **kwargs):
         """
         If running in an interactive terminal, log to it.
         """
         if sys.__stderr__.isatty():
-            self.log_to_file('stderr', level=level)
+            self.log_to_file("stderr", *args, **kwargs)
 
     def add_handler(self, handler):
         """
@@ -207,8 +215,9 @@ class LoggerConfig:
         root = logging.getLogger(self.name)
         root.setLevel(self.level)
 
-        root.propagate = bool(self._handlers if self.propagate is None
-                              else self.propagate)
+        root.propagate = bool(
+            self._handlers if self.propagate is None else self.propagate
+        )
 
         if self.exclusive:
             root.handlers = self._handlers[:]
@@ -223,8 +232,8 @@ class LoggerConfig:
 
     @contextlib.contextmanager
     def logger(self, logger_name):
-        assert logger_name, 'must provide logger_name'
-        logger_name = '.'.join(n for n in (self.name, logger_name) if n)
+        assert logger_name, "must provide logger_name"
+        logger_name = ".".join(n for n in (self.name, logger_name) if n)
         lc = type(self)(logger_name)
         yield lc
         lc.finish()

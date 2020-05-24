@@ -1,21 +1,26 @@
+branches:
+  - master
+
+dist: xenial
 sudo: false
 language: python
+cache:
+  pip: true
 
 python:
-  - '3.5'
+  - '3.8'
+  - '3.7'
   - '3.6'
+  - '3.5'
+install: pip install -e . --upgrade pytest
+script: pytest
 
-matrix:
+jobs:
   include:
-    - python: '3.7'
-      dist: xenial
-      sudo: true
+    - name: black
+      install: pip install --upgrade black
+      script: black --check .
 
-install:
-  - pip install poetry
-  - poetry install
-
-script:
-  - pycodestyle logconf.py
-  - pylint -E logconf
-  - pytest
+    - name: pylint
+      install: pip install -e . --upgrade pylint
+      script: pylint -E logconf

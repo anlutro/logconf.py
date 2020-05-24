@@ -1,6 +1,20 @@
+# python
 __pycache__
 *.pyc
-/.pytest_cache
-/.venv
+/pip-selfcheck.json
+*.egg-info
+.eggs
 /dist
-/pyproject.lock
+
+# pytest
+/.pytest_cache
+/.cache
+/.coverage
+
+# mypy
+/.mypy_cache
+
+# virtualenv
+/.venv
+/.virtualenv
+.tox
