@@ -28,7 +28,8 @@ class JsonFormatter(logging.Formatter):
             "name": record.name,
             "msg": self.formatMessage(record),
             "time": time.strftime(
-                "%Y-%m-%dT%H:%M:%S%z", self.converter(record.created),
+                "%Y-%m-%dT%H:%M:%S%z",
+                self.converter(record.created),
             ),
         }
 
@@ -80,7 +81,11 @@ class ColorLogRecord(logging.LogRecord):
     def __init__(self, *args, **kwargs):
         super(ColorLogRecord, self).__init__(*args, **kwargs)
         self.levelname_colored = "".join(
-            (self.COLORS[self.levelno], self.levelname, self.RESET,)
+            (
+                self.COLORS[self.levelno],
+                self.levelname,
+                self.RESET,
+            )
         )
 
 
